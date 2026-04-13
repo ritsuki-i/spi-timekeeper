@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPI Fast-Pace Trainer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0a0a0a;
+            --bg-card: #141414;
+            --bg-elevated: #1a1a1a;
+            --border: #262626;
+            --text: #fafafa;
+            --text-muted: #a3a3a3;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0rem;
+        }
+
+        .container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 560px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--text);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Setup Screen */
+        .input-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text);
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Timer Screen */
+        .timer-container {
+            position: relative;
+            margin: 2.5rem 0;
+        }
+
+        .timer-ring {
+            width: min(100%, clamp(280px, 62vw, 380px));
+            aspect-ratio: 1;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timer-ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-ring-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 8;
+        }
+
+        .timer-ring-overrun {
+            fill: none;
+            stroke: var(--danger);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s linear, stroke 0.3s, opacity 0.3s;
+            opacity: 0;
+        }
+
+        .timer-ring-overrun-second {
+            stroke: var(--primary);
+        }
+
+        .timer-ring-overrun-third {
+            stroke: #8b5cf6;
+        }
+
+        .timer-ring-progress {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s;
+        }
+
+        #timer-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(4rem, 9vw, 5.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            transition: color 0.3s;
+            line-height: 1;
+            width: 100%;
+        }
+
+        #question-info {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .question-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+        }
+
+        .question-badge span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-next {
+            background: var(--success);
+            font-size: 1rem;
+            padding: 1rem 1.5rem;
+        }
+
+        .btn-next:hover {
+            background: #16a34a;
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        kbd {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 0.125rem 0.375rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            min-width: 1.5rem;
+        }
+
+        .hint-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Result Screen */
+        .result-summary {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .summary-item {
+            padding: 0.5rem;
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .result-list {
+            text-align: left;
+            max-height: 280px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .result-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .result-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .result-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .result-q {
+            background: var(--border);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .diff-plus {
+            color: var(--danger);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .diff-minus {
+            color: var(--success);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .paused #timer-display {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .timer-ring {
+                width: min(100%, clamp(260px, 78vw, 320px));
+            }
+
+            #timer-display {
+                font-size: clamp(3.5rem, 13vw, 4.5rem);
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Setup Screen -->
+    <div id="setup-screen">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1>SPI Trainer</h1>
+        </div>
+        <p class="subtitle">高速問題演習で時間感覚を鍛えよう</p>
+
+        <div class="input-group">
+            <label>目標問題数</label>
+            <input type="number" id="total-questions" value="10" min="1" placeholder="問題数を入力">
+        </div>
+        <div class="input-group">
+            <label>1問あたりの制限時間（秒）</label>
+            <input type="number" id="per-question-time" value="60" min="5" placeholder="秒数を入力">
+        </div>
+        <button class="btn" onclick="startApp()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            演習を開始
+        </button>
+    </div>
+
+    <!-- Timer Screen -->
+    <div id="timer-screen" class="hidden">
+        <div class="question-badge">
+            <span id="current-q">1</span>
+            <span style="color: var(--text-muted);">/</span>
+            <span id="total-q" style="color: var(--text-muted);">10</span>
+            問目
+        </div>
+
+        <div class="timer-container">
+            <div class="timer-ring">
+                <svg viewBox="0 0 120 120">
+                    <circle class="timer-ring-bg" cx="60" cy="60" r="54"></circle>
+                    <circle class="timer-ring-overrun" id="overrun-ring" cx="60" cy="60" r="54"
+                        stroke-dasharray="0 339.292" stroke-dashoffset="0"></circle>
+                    <circle class="timer-ring-overrun timer-ring-overrun-second" id="overrun-ring-second" cx="60" cy="60" r="54"
+                        stroke-dasharray="0 339.292" stroke-dashoffset="0"></circle>
+                    <circle class="timer-ring-overrun timer-ring-overrun-third" id="overrun-ring-third" cx="60" cy="60" r="54"
+                        stroke-dasharray="0 339.292" stroke-dashoffset="0"></circle>
+                    <circle class="timer-ring-progress" id="progress-ring" cx="60" cy="60" r="54" 
+                        stroke-dasharray="339.292" stroke-dashoffset="0"></circle>
+                </svg>
+                <div id="timer-display">01:00</div>
+            </div>
+        </div>
+
+        <button class="btn btn-next" onclick="nextQuestion()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+            次の問題へ
+            <kbd>Space</kbd>
+        </button>
+        <button class="btn btn-secondary" id="pause-btn" onclick="togglePause()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" id="pause-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span id="pause-text">一時停止</span>
+            <kbd>Enter</kbd>
+        </button>
+
+        <p class="hint-text">
+            <kbd>Esc</kbd> でリセット
+        </p>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="hidden">
+        <div class="logo">
+            <div class="logo-icon" style="background: linear-gradient(135deg, var(--success), #22d3ee);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1>演習完了</h1>
+        </div>
+
+        <div class="result-summary">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">合計時間</div>
+                    <div class="summary-value" id="total-time">0:00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">平均回答</div>
+                    <div class="summary-value" id="avg-time">0秒</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">目標との差</div>
+                    <div class="summary-value" id="total-diff">±0秒</div>
+                </div>
+            </div>
+        </div>
+
+        <ul id="result-list" class="result-list"></ul>
+
+        <button class="btn" onclick="location.reload()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            もう一度チャレンジ
+        </button>
+    </div>
+</div>
+
+<script>
+    let config = { total: 0, perTime: 0 };
+    let state = {
+        currentIdx: 1,
+        timeLeft: 0,
+        isPaused: false,
+        results: [],
+        interval: null
+    };
+
+    const screens = {
+        setup: document.getElementById('setup-screen'),
+        timer: document.getElementById('timer-screen'),
+        result: document.getElementById('result-screen')
+    };
+
+    const circumference = 2 * Math.PI * 54;
+
+    function startApp() {
+        config.total = parseInt(document.getElementById('total-questions').value) || 10;
+        config.perTime = parseInt(document.getElementById('per-question-time').value) || 60;
+
+        screens.setup.classList.add('hidden');
+        screens.timer.classList.remove('hidden');
+
+        document.getElementById('total-q').textContent = config.total;
+        initQuestion();
+    }
+
+    function initQuestion() {
+        state.timeLeft = config.perTime;
+        state.isPaused = false;
+        updatePauseButton();
+        updateDisplay();
+        startTimer();
+    }
+
+    function startTimer() {
+        if (state.interval) clearInterval(state.interval);
+        state.interval = setInterval(() => {
+            if (!state.isPaused) {
+                state.timeLeft--;
+                updateDisplay();
+            }
+        }, 1000);
+    }
+
+    function updateDisplay() {
+        const display = document.getElementById('timer-display');
+        const progressRing = document.getElementById('progress-ring');
+        const overrunRing = document.getElementById('overrun-ring');
+        const overrunRingSecond = document.getElementById('overrun-ring-second');
+        const overrunRingThird = document.getElementById('overrun-ring-third');
+        const currentQ = document.getElementById('current-q');
+
+        currentQ.textContent = state.currentIdx;
+
+        // Timer text
+        const absTime = Math.abs(state.timeLeft);
+        const mins = String(Math.floor(absTime / 60)).padStart(2, '0');
+        const secs = String(absTime % 60).padStart(2, '0');
+        display.innerText = `${state.timeLeft < 0 ? '-' : ''}${mins}:${secs}`;
+
+        // Progress ring
+        if (state.timeLeft >= 0) {
+            const percent = Math.max(0, state.timeLeft / config.perTime);
+            const offset = circumference * (1 - percent);
+            progressRing.style.strokeDashoffset = offset;
+            progressRing.style.opacity = '1';
+            overrunRing.style.strokeDasharray = `0 ${circumference}`;
+            overrunRingSecond.style.strokeDasharray = `0 ${circumference}`;
+            overrunRingThird.style.strokeDasharray = `0 ${circumference}`;
+            overrunRing.style.opacity = '0';
+            overrunRingSecond.style.opacity = '0';
+            overrunRingThird.style.opacity = '0';
+        } else {
+            const overtimeSeconds = Math.abs(state.timeLeft);
+            const overtimeLaps = Math.floor(overtimeSeconds / config.perTime);
+            const overtimeProgress = (overtimeSeconds % config.perTime) / config.perTime;
+            const overtimeLength = overtimeProgress * circumference;
+            progressRing.style.strokeDashoffset = circumference;
+            progressRing.style.opacity = '0.18';
+            overrunRing.style.opacity = '1';
+            overrunRingSecond.style.opacity = '0';
+            overrunRingThird.style.opacity = '0';
+
+            if (overtimeLaps === 0) {
+                overrunRing.style.strokeDasharray = `${overtimeLength} ${circumference}`;
+                overrunRingSecond.style.strokeDasharray = `0 ${circumference}`;
+                overrunRingThird.style.strokeDasharray = `0 ${circumference}`;
+            } else if (overtimeLaps === 1) {
+                overrunRing.style.strokeDasharray = `${circumference} ${circumference}`;
+                overrunRingSecond.style.strokeDasharray = `${overtimeLength} ${circumference}`;
+                overrunRingSecond.style.opacity = '1';
+                overrunRingThird.style.strokeDasharray = `0 ${circumference}`;
+            } else {
+                overrunRing.style.strokeDasharray = `${circumference} ${circumference}`;
+                overrunRingSecond.style.strokeDasharray = `${circumference} ${circumference}`;
+                overrunRingSecond.style.opacity = '1';
+                overrunRingThird.style.strokeDasharray = `${overtimeLength} ${circumference}`;
+                overrunRingThird.style.opacity = '1';
+            }
+        }
+
+        // Colors based on time
+        if (state.timeLeft > 15) {
+            display.style.color = 'var(--text)';
+            progressRing.style.stroke = 'var(--success)';
+            overrunRing.style.opacity = '0';
+            overrunRingSecond.style.opacity = '0';
+            overrunRingThird.style.opacity = '0';
+        } else if (state.timeLeft > 5) {
+            display.style.color = 'var(--warning)';
+            progressRing.style.stroke = 'var(--warning)';
+            overrunRing.style.opacity = '0';
+            overrunRingSecond.style.opacity = '0';
+            overrunRingThird.style.opacity = '0';
+        } else {
+            progressRing.style.stroke = 'var(--danger)';
+            if (state.timeLeft >= 0) {
+                display.style.color = 'var(--danger)';
+                overrunRing.style.opacity = '0';
+                overrunRingSecond.style.opacity = '0';
+                overrunRingThird.style.opacity = '0';
+            } else {
+                const overtimeLaps = Math.floor(Math.abs(state.timeLeft) / config.perTime);
+                if (overtimeLaps === 0) {
+                    display.style.color = 'var(--danger)';
+                } else if (overtimeLaps === 1) {
+                    display.style.color = 'var(--primary)';
+                } else {
+                    display.style.color = '#8b5cf6';
+                }
+            }
+        }
+    }
+
+    function nextQuestion() {
+        const elapsed = config.perTime - state.timeLeft;
+        state.results.push({
+            q: state.currentIdx,
+            time: elapsed,
+            diff: elapsed - config.perTime
+        });
+
+        if (state.currentIdx >= config.total) {
+            finishApp();
+        } else {
+            state.currentIdx++;
+            initQuestion();
+        }
+    }
+
+    function togglePause() {
+        state.isPaused = !state.isPaused;
+        updatePauseButton();
+        
+        if (state.isPaused) {
+            document.getElementById('timer-screen').classList.add('paused');
+        } else {
+            document.getElementById('timer-screen').classList.remove('paused');
+        }
+    }
+
+    function updatePauseButton() {
+        const pauseText = document.getElementById('pause-text');
+        const pauseIcon = document.getElementById('pause-icon');
+        
+        if (state.isPaused) {
+            pauseText.textContent = '再開';
+            pauseIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+        } else {
+            pauseText.textContent = '一時停止';
+            pauseIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
+        }
+    }
+
+    function finishApp() {
+        clearInterval(state.interval);
+        screens.timer.classList.add('hidden');
+        screens.result.classList.remove('hidden');
+
+        const list = document.getElementById('result-list');
+        list.innerHTML = '';
+
+        let totalTime = 0;
+        let totalDiff = 0;
+
+        state.results.forEach(res => {
+            totalTime += res.time;
+            totalDiff += res.diff;
+
+            const li = document.createElement('li');
+            li.className = 'result-item';
+            const diffText = res.diff > 0 ? `+${res.diff}秒` : `${res.diff}秒`;
+            const diffClass = res.diff > 0 ? 'diff-plus' : 'diff-minus';
+
+            li.innerHTML = `
+                <div class="result-item-left">
+                    <div class="result-q">${res.q}</div>
+                    <span>${res.time}秒</span>
+                </div>
+                <span class="${diffClass}">${diffText}</span>
+            `;
+            list.appendChild(li);
+        });
+
+        const avg = (totalTime / config.total).toFixed(1);
+        const mins = Math.floor(totalTime / 60);
+        const secs = totalTime % 60;
+
+        document.getElementById('total-time').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+        document.getElementById('avg-time').textContent = `${avg}秒`;
+
+        const diffEl = document.getElementById('total-diff');
+        diffEl.textContent = `${totalDiff > 0 ? '+' : ''}${totalDiff}秒`;
+        diffEl.className = `summary-value ${totalDiff > 0 ? 'diff-plus' : 'diff-minus'}`;
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+        if (screens.setup.classList.contains('hidden') && screens.result.classList.contains('hidden')) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                nextQuestion();
+            }
+            if (e.code === 'Enter') {
+                e.preventDefault();
+                togglePause();
+            }
+            if (e.code === 'Escape') {
+                if (confirm('演習をリセットしますか？')) location.reload();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
