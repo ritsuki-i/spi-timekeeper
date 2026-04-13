@@ -551,8 +551,14 @@
         timer: document.getElementById('timer-screen'),
         result: document.getElementById('result-screen')
     };
+    const totalQuestionsInput = document.getElementById('total-questions');
 
     const circumference = 2 * Math.PI * 54;
+
+    function focusSetupInput() {
+        totalQuestionsInput.focus();
+        totalQuestionsInput.select();
+    }
 
     function startApp() {
         config.total = parseInt(document.getElementById('total-questions').value) || 10;
@@ -786,6 +792,10 @@
                 if (confirm('演習をリセットしますか？')) location.reload();
             }
         }
+    });
+
+    window.addEventListener('load', () => {
+        focusSetupInput();
     });
 </script>
 
