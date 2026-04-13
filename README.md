@@ -54,7 +54,7 @@ https://ritsuki-i.github.io/spi-timekeeper/
 
 ## キーボード操作
 
-- `Space`: 開始 / 次の問題へ
+- `Space`: 開始 / 次の問題へ / もう一度チャレンジ
 - `Enter`: 一時停止 / 再開
 - `Esc`: リセット確認
 
