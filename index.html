@@ -757,7 +757,16 @@
 
     // Keyboard controls
     window.addEventListener('keydown', (e) => {
-        if (screens.setup.classList.contains('hidden') && screens.result.classList.contains('hidden')) {
+        const isSetupVisible = !screens.setup.classList.contains('hidden');
+        const isTimerVisible = !screens.timer.classList.contains('hidden') && screens.result.classList.contains('hidden');
+
+        if (isSetupVisible && e.code === 'Space') {
+            e.preventDefault();
+            startApp();
+            return;
+        }
+
+        if (isTimerVisible) {
             if (e.code === 'Space') {
                 e.preventDefault();
                 nextQuestion();
